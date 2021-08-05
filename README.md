@@ -1,1 +1,1 @@
-# waiterbot2
+test repository for a discord bot
