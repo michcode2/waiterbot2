@@ -2,6 +2,11 @@ import discord
 import discordtoken#module that has my client secret so this looks better
 import asyncio
 
+
+
+global test
+test=True#enable testing mode so it can run without @everyone for every test, defualt no ping
+
 client = discord.Client()
 
 
@@ -11,7 +16,8 @@ votes=[]
 dGames=[]#list for desserts and their votes
 dVotes=[]
 
-with open("games.txt","r") as file:
+
+with open("mains.txt","r") as file:
     for line in file:
         games.append(line.rstrip())#adds each line of the file, and gets rid of the \n at the end to make the rest of it simpler
         votes.append(0)
@@ -76,11 +82,16 @@ async def on_ready():
 #testing method
 @client.event
 async def on_message(message):
-    if message.content.startswith("/wbm"): #only respond if people use the keyword, makes testing easier
-        
+    global test
+    if message.content.startswith("/wbm"): #only respond if people use the keyword for menus, stops it responding to unrelated messages
+        channel=message.channel
         if message.content[5:]=="mains":
-            channel=message.channel
-            await channel.send("@everyone from now you have 2 minutes to vote on a main course. Good luck.")
+            
+            
+            if test:
+                await channel.send("From now you have 2 minutes to vote on a main course. Good luck.")
+            else:
+                await channel.send("@everyone from now you have 2 minutes to vote on a main course. Good luck.")
             messages=[]
             for i in range(len(games)):#for every game, send a message and add a reaction to each of them. Finally adds them to a list for the tallying method
                 msg = await channel.send(games[i])
@@ -94,8 +105,10 @@ async def on_message(message):
             await tallyResults(messages,True)
             
         elif message.content[5:]=="dessert":#same as above but for mains
-            channel=message.channel
-            await channel.send("@everyone from now you have 2 minutes to vote on a dessert. Good luck.")
+            if test:
+                await channel.send("@From now you have 2 minutes to vote on a main course. Good luck.")
+            else:
+                await channel.send("@everyone from now you have 2 minutes to vote on a dessert. Good luck.")
             messages=[]
             for i in range(len(dGames)):
                 msg = await channel.send(dGames[i])
@@ -107,6 +120,19 @@ async def on_message(message):
             
             
             await tallyResults(messages,False)
+
+    if message.content.startswith("/wbt"):
+        
+        channel=message.channel
+        if message.content[5:] == "on":
+            test=True
+            await channel.send("Testing mode on")
+        elif message.content[5:]=="off":
+            test=False
+            await channel.send ("Testing mode off, be careful")
+        else:
+            await channel.send(str(test))
+            
 
 
 
